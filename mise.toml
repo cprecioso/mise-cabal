@@ -1,7 +1,19 @@
 [env]
 MISE_USE_VERSIONS_HOST = "0"
 
+[plugins]
+"vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
+
 [tools]
+# Haskell toolchain used to build/test the cabal backend.
+# GHC via the mise-ghcup plugin, cabal via aqua. The cabal binary is referenced by
+# its full aqua spec, not the bare name `cabal`, because this plugin is itself named
+# `cabal` and would otherwise shadow the registry tool.
+ghcup = "latest"
+"mise-ghcup:ghc" = "latest"
+"aqua:haskell/cabal/cabal-install" = "latest"
+
+# Dev / lint tooling.
 actionlint = "latest"
 hk = "latest"
 lua = "5.4"

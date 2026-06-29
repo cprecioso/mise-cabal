@@ -1,42 +1,36 @@
 #!/usr/bin/env bash
-#MISE description="Run backend plugin tests - test plugin linking and basic functionality"
+#MISE description="Run backend plugin tests - exercise the cabal backend end-to-end"
 set -euo pipefail
 
-# Link the plugin for testing
-mise plugin link --force <BACKEND> .
+# Link this plugin under the name "cabal" for testing.
+mise plugin link --force cabal .
 
-# Clear cache to ensure fresh testing
+# Clear cache so we exercise the real hooks.
 mise cache clear
 
-# Test that the plugin can list tools (this should work even if no tools are available)
-echo "Testing plugin linking and basic functionality..."
+# `hello` is a tiny Hackage package: depends only on `base`, builds in seconds,
+# and installs a `hello` executable that prints a greeting.
+TEST_TOOL="hello"
 
-# Try to list available versions for a test tool
-# Note: This will likely fail until you implement the backend methods
-# Replace <TEST_TOOL> with a real tool name your backend supports
-TEST_TOOL="<TEST_TOOL>"
+echo "==> Listing versions for cabal:${TEST_TOOL} (BackendListVersions)"
+mise ls-remote "cabal:${TEST_TOOL}"
 
-echo "Testing version listing for ${TEST_TOOL}..."
-if mise ls-remote <BACKEND>:${TEST_TOOL} 2>/dev/null; then
-    echo "✓ Version listing works"
+if command -v ghc >/dev/null 2>&1 && command -v cabal >/dev/null 2>&1; then
+    echo "==> Installing cabal:${TEST_TOOL}@latest (BackendInstall, compiles from source)"
+    mise install "cabal:${TEST_TOOL}@latest"
+
+    echo "==> Executing the installed binary (BackendExecEnv)"
+    # `hello` has no --version flag, so run it bare and assert on its output.
+    out="$(mise x "cabal:${TEST_TOOL}@latest" -- hello)"
+    echo "    output: ${out}"
+    case "${out}" in
+    *Hello*) echo "OK: got expected greeting" ;;
+    *)
+        echo "FAIL: unexpected output from hello"
+        exit 1
+        ;;
+    esac
+    echo "All cabal backend tests passed."
 else
-    echo "⚠ Version listing failed - implement backend_list_versions.lua for your backend"
+    echo "skipping build test: ghc/cabal not on PATH"
 fi
-
-# Test installation if versions are available
-echo "Testing installation..."
-if mise install <BACKEND>:${TEST_TOOL}@latest 2>/dev/null; then
-    echo "✓ Installation works"
-    
-    # Test that the tool can be executed
-    if mise exec <BACKEND>:${TEST_TOOL}@latest -- ${TEST_TOOL} --version 2>/dev/null; then
-        echo "✓ Tool execution works"
-    else
-        echo "⚠ Tool execution failed - check backend_exec_env.lua implementation"
-    fi
-else
-    echo "⚠ Installation failed - implement backend_install.lua for your backend"
-fi
-
-echo "✓ Basic plugin structure tests completed"
-echo "Note: Replace <TEST_TOOL> with a real tool and implement the backend methods"

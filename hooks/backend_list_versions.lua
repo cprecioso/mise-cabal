@@ -1,85 +1,55 @@
---- Lists available versions for a tool in this backend
+--- Lists available Hackage versions for a package (ascending order).
 --- Documentation: https://mise.jdx.dev/backend-plugin-development.html#backendlistversions
---- @param ctx {tool: string} Context (tool = the tool name requested)
---- @return {versions: string[]} Table containing list of available versions
+--- @param ctx BackendListVersionsCtx
+--- @return BackendListVersionsResult
 function PLUGIN:BackendListVersions(ctx)
-    local tool = ctx.tool
-
-    -- Validate tool name
-    if not tool or tool == "" then
-        error("Tool name cannot be empty")
-    end
-
-    -- Example implementations (choose/modify based on your backend):
-
-    -- Example 1: API-based version listing (like npm, pip, cargo)
     local http = require("http")
     local json = require("json")
+    local semver = require("semver")
 
-    -- Replace with your backend's API endpoint
-    local api_url = "https://api.<BACKEND>.org/packages/" .. tool .. "/versions"
-
-    local resp, err = http.get({
-        url = api_url,
-        -- headers = { ["Authorization"] = "Bearer " .. token } -- if needed
-    })
-
-    if err then
-        error("Failed to fetch versions for " .. tool .. ": " .. err)
+    local tool = ctx.tool
+    if not tool or tool == "" then
+        error("cabal: package name cannot be empty")
     end
 
+    -- The Hackage "preferred" endpoint returns JSON with two arrays:
+    --   "normal-version"     : usable versions
+    --   "deprecated-version" : versions the maintainer discourages (still installable)
+    -- NOTE: http.get yields internally, so it must NOT be wrapped in pcall. It
+    -- returns (response, err) instead of raising.
+    local url = "https://hackage.haskell.org/package/" .. tool .. "/preferred"
+    local resp, err = http.get({ url = url, headers = { ["Accept"] = "application/json" } })
+    if err ~= nil then
+        error("cabal: failed to reach Hackage for '" .. tool .. "': " .. tostring(err))
+    end
+    if resp.status_code == 404 then
+        error("cabal: package '" .. tool .. "' not found on Hackage")
+    end
     if resp.status_code ~= 200 then
-        error("API returned status " .. resp.status_code .. " for " .. tool)
+        error("cabal: Hackage returned HTTP " .. tostring(resp.status_code) .. " for '" .. tool .. "'")
     end
 
     local data = json.decode(resp.body)
-    local versions = {}
+    if type(data) ~= "table" then
+        error("cabal: could not parse Hackage response for '" .. tool .. "'")
+    end
 
-    -- Parse versions from API response (adjust based on your API structure)
-    if data.versions then
-        for _, version in ipairs(data.versions) do
-            table.insert(versions, version)
+    -- Include deprecated versions too, so a previously pinned version stays resolvable.
+    local versions = {}
+    local function append(list)
+        if type(list) == "table" then
+            for _, v in ipairs(list) do
+                versions[#versions + 1] = v
+            end
         end
     end
-
-    -- Example 2: Command-line based version listing
-    --[[
-    local cmd = require("cmd")
-
-    -- Replace with your backend's command to list versions
-    local command = "<BACKEND> search " .. tool .. " --versions"
-    local result = cmd.exec(command)
-
-    if not result or result:match("error") then
-        error("Failed to fetch versions for " .. tool)
-    end
-
-    local versions = {}
-    -- Parse command output to extract versions
-    for version in result:gmatch("[%d%.]+[%w%-]*") do
-        table.insert(versions, version)
-    end
-    --]]
-
-    -- Example 3: Registry file parsing
-    --[[
-    local file = require("file")
-
-    -- Replace with path to your backend's registry or manifest
-    local registry_path = "/path/to/<BACKEND>/registry/" .. tool .. ".json"
-
-    if not file.exists(registry_path) then
-        error("Tool " .. tool .. " not found in registry")
-    end
-
-    local content = file.read(registry_path)
-    local data = json.decode(content)
-    local versions = data.versions or {}
-    --]]
+    append(data["normal-version"])
+    append(data["deprecated-version"])
 
     if #versions == 0 then
-        error("No versions found for " .. tool)
+        error("cabal: no versions found for '" .. tool .. "'")
     end
 
-    return { versions = versions }
+    -- Built-in semver sort (ascending), as mise expects oldest -> newest.
+    return { versions = semver.sort(versions) }
 end
