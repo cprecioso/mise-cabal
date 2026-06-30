@@ -70,6 +70,9 @@ jobs:
             "cabal" = "latest"
             "mise-ghcup:ghc" = "latest"
 
+            [plugins]
+            "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
+
       - run: mise plugin link --force mise-cabal ./plugin
       - run: mise install
 
