@@ -8,12 +8,14 @@ MISE_USE_VERSIONS_HOST = "0"
 # Haskell toolchain used to build/test the cabal backend.
 # - aqua:ghcup: the mise-ghcup plugin declares `depends = { "aqua:ghcup" }`, so this
 #   exact spec must be configured for mise to put ghcup on the plugin's hook PATH.
-# - mise-ghcup:ghc: GHC, installed through ghcup by the plugin.
+# - mise-ghcup:ghc: GHC pinned to a version pandoc-cli's deps support. GHC "latest"
+#   (9.14, base 4.22) is too new (haddock-library requires base <4.21).
 # - cabal via aqua, referenced by its full spec rather than the bare `cabal` because
-#   this plugin is itself named `cabal` and would otherwise shadow the registry tool.
+#   this plugin is itself named `cabal`; the bare name is shadowed once the plugin is
+#   linked and would not be wired onto the install-hook PATH.
 "aqua:ghcup" = "latest"
-"mise-ghcup:ghc" = "latest"
-cabal = "latest"
+"mise-ghcup:ghc" = "9.10.2"
+"aqua:haskell/cabal/cabal-install" = "latest"
 
 # Dev / lint tooling. (No `lua` interpreter: hooks run in mise's embedded Lua and
 # linting uses lua-language-server. vfox-lua also fails to build on Windows.)
