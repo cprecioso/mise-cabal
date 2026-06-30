@@ -14,14 +14,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # Windows is non-blocking for now: on the Windows runner mise falls back to
-    # "file shim mode" (mise-shim.exe missing) and does not place dependency tools
-    # (ghc/cabal) on the install-hook PATH, so the build step cannot find them. The
-    # plugin code is cross-platform; this is a mise-on-Windows limitation.
-    continue-on-error: ${{ matrix.os == 'windows-latest' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v4
         with:
           # Cache the installed toolchain (GHC is large) and cabal store.
           cache: true
