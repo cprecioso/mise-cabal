@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Run backend plugin tests - test alex works correctly (needs correct data_dir handling)"
+#MISE tools={"mise-cabal:alex": "latest"}
 set -euo pipefail
 
 # Data-file tool check. alex (the Haskell lexer generator) reads its code-gen
