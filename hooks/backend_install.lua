@@ -9,6 +9,19 @@ local function shquote(s)
     return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
+--- Convert forward slashes to backslashes on Windows. mise's paths use forward
+--- slashes, but cmd.exe builtins (mkdir, dir) reject them ("The filename,
+--- directory name, or volume label syntax is incorrect"). cabal itself accepts
+--- either, but we normalize everywhere for consistency.
+--- @param p string
+--- @return string
+local function native_path(p)
+    if RUNTIME.osType == "windows" then
+        return (p:gsub("/", "\\"))
+    end
+    return p
+end
+
 --- Create a directory (and parents) cross-platform; no-op if it already exists.
 --- @param path string
 local function ensure_dir(path)
@@ -18,7 +31,7 @@ local function ensure_dir(path)
         return
     end
     if RUNTIME.osType == "windows" then
-        cmd.exec("mkdir " .. shquote(path)) -- cmd.exe md creates intermediate dirs
+        cmd.exec("mkdir " .. shquote(native_path(path))) -- cmd.exe md creates intermediate dirs
     else
         cmd.exec("mkdir -p " .. shquote(path))
     end
@@ -33,7 +46,7 @@ end
 --- @return string
 local function with_cabal_dir(dir, command)
     if RUNTIME.osType == "windows" then
-        return 'set "CABAL_DIR=' .. dir .. '" && ' .. command
+        return 'set "CABAL_DIR=' .. native_path(dir) .. '" && ' .. command
     end
     return "CABAL_DIR=" .. shquote(dir) .. " " .. command
 end
@@ -110,14 +123,14 @@ function PLUGIN:BackendInstall(ctx)
         .. "-"
         .. version
         .. " --overwrite-policy=always --installdir="
-        .. shquote(bin_dir)
+        .. shquote(native_path(bin_dir))
     cmd.exec(with_cabal_dir(install_path, install_cmd), { cwd = install_path })
 
     -- Safety net: a successful install must place at least one executable here.
     -- Catches library-only packages if cabal did not already error out.
     local listing
     if RUNTIME.osType == "windows" then
-        listing = cmd.exec("dir /b " .. shquote(bin_dir) .. " 2>NUL || echo.")
+        listing = cmd.exec("dir /b " .. shquote(native_path(bin_dir)) .. " 2>NUL || echo.")
     else
         listing = cmd.exec("ls -1 " .. shquote(bin_dir) .. " 2>/dev/null || echo")
     end
