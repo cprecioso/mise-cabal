@@ -31,25 +31,40 @@ if command -v ghc >/dev/null 2>&1 && command -v cabal >/dev/null 2>&1; then
         ;;
     esac
 
-    # Data-file tool check. pandoc reads its templates (data files) via getDataDir at
-    # runtime, so a successful --print-default-template proves the per-tool CABAL_DIR
-    # store, where those data files live, is correctly pointed to. Building pandoc from
-    # source is heavy, so this runs on Linux only; the data-dir mechanism is identical
-    # on every OS (the per-OS path handling is already covered by the hello install).
-    if [ "$(uname -s)" = "Linux" ]; then
-        echo "==> Installing cabal:pandoc-cli@latest (data-file tool; builds pandoc, slow)"
-        mise install "cabal:pandoc-cli@latest"
+    # Data-file tool check. alex (the Haskell lexer generator) reads its code-gen
+    # templates (AlexTemplate.hs / AlexWrappers.hs, declared as cabal data-files)
+    # from its data dir at runtime via Paths_alex/getDataDir, so generating a lexer
+    # proves the per-tool CABAL_DIR store, where those data files live, is pointed
+    # to correctly. alex depends only on base/array/containers/directory, so unlike
+    # pandoc it builds in seconds on every OS.
+    echo "==> Installing cabal:alex@latest (data-file tool, builds fast)"
+    mise install "cabal:alex@latest"
 
-        echo "==> Verifying pandoc resolves its data dir (--print-default-template)"
-        tmpl="$(mise x "cabal:pandoc-cli@latest" -- pandoc --print-default-template=html)" || true
-        case "${tmpl}" in
-        *'$body$'*) echo "OK: pandoc read its default template, data dir resolved" ;;
-        *)
-            echo "FAIL: pandoc could not read its data files (data dir not pointed correctly)"
-            exit 1
-            ;;
-        esac
+    echo "==> Verifying alex resolves its data dir (generates a lexer from its template)"
+    work="$(mktemp -d)"
+    cat >"${work}/lexer.x" <<'EOF'
+{
+module Main (main) where
+}
+%wrapper "basic"
+tokens :-
+  $white+      ;
+  [a-zA-Z]+    { \s -> s }
+{
+main :: IO ()
+main = return ()
+}
+EOF
+    # Run from the temp dir with RELATIVE paths so this also works under Windows
+    # Git Bash: the native alex.exe would not understand an MSYS "/tmp/..." path.
+    ( cd "${work}" && mise x "cabal:alex@latest" -- alex lexer.x -o lexer.hs )
+    if grep -q 'alexScan' "${work}/lexer.hs"; then
+        echo "OK: alex spliced in its template, data dir resolved"
+    else
+        echo "FAIL: alex could not read its template data files (data dir not pointed correctly)"
+        exit 1
     fi
+    rm -rf "${work}"
 
     echo "All cabal backend tests passed."
 else
