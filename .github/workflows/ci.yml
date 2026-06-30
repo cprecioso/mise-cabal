@@ -86,4 +86,4 @@ jobs:
           ${{ matrix.tool.command }}
 
       - run: >
-          mise run ./plugin/test/${{ matrix.tool.command }}
+          mise run ./plugin/mise-tasks/test/${{ matrix.tool.command }}
