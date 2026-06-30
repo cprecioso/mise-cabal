@@ -68,7 +68,7 @@ jobs:
             [tools]
             "aqua:ghcup" = "latest"
             "cabal" = "latest"
-            "mise-ghcup:ghc" = "latest"
+            "mise-ghcup:ghc" = "9.14.1"
 
             [plugins]
             "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
