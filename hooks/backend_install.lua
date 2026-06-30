@@ -88,28 +88,28 @@ function PLUGIN:BackendInstall(ctx)
 
     local tool, version, install_path = ctx.tool, ctx.version, ctx.install_path
     if not tool or tool == "" then
-        error("cabal: package name cannot be empty")
+        error("mise-cabal: package name cannot be empty")
     end
     if not version or version == "" then
-        error("cabal: version cannot be empty")
+        error("mise-cabal: version cannot be empty")
     end
     if not install_path or install_path == "" then
-        error("cabal: install_path cannot be empty")
+        error("mise-cabal: install_path cannot be empty")
     end
 
     -- Toolchain must be present: cabal compiles Hackage packages from source.
     if not have_tool("cabal") then
         error(
-            "cabal: 'cabal' not found on PATH. This backend compiles tools from source and needs GHC + cabal.\n"
+            "mise-cabal: 'cabal' not found on PATH. This backend compiles tools from source and needs GHC + cabal.\n"
                 .. "Easiest via mise, add to your config:\n"
                 .. '  [plugins]\n  "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"\n'
-                .. '  [tools]\n  "aqua:ghcup" = "latest"\n  "mise-ghcup:ghc" = "latest"\n  "aqua:haskell/cabal/cabal-install" = "latest"\n'
+                .. '  [tools]\n  "aqua:ghcup" = "latest"\n  "mise-ghcup:ghc" = "latest"\n  "cabal" = "latest"\n'
                 .. "Or install GHCup: https://www.haskell.org/ghcup/"
         )
     end
     if not have_tool("ghc") then
         error(
-            "cabal: 'ghc' not found on PATH. A GHC compiler is required "
+            "mise-cabal: 'ghc' not found on PATH. A GHC compiler is required "
                 .. "(e.g. mise-ghcup:ghc or https://www.haskell.org/ghcup/)."
         )
     end
@@ -145,7 +145,7 @@ function PLUGIN:BackendInstall(ctx)
     end
     if type(listing) ~= "string" or listing:gsub("%s", "") == "" then
         error(
-            "cabal: no executable was produced for "
+            "mise-cabal: no executable was produced for "
                 .. tool
                 .. "-"
                 .. version

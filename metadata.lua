@@ -3,8 +3,8 @@
 -- Documentation: https://mise.jdx.dev/backend-plugin-development.html
 
 PLUGIN = { -- luacheck: ignore
-    -- Required: backend name users reference as `cabal:<package>`
-    name = "cabal",
+    -- Required: backend name users reference as `mise-cabal:<package>`
+    name = "mise-cabal",
 
     -- Required: plugin version (not the tool versions)
     version = "1.0.0",
@@ -29,7 +29,7 @@ PLUGIN = { -- luacheck: ignore
 
     -- Optional: user-facing notes
     notes = {
-        "Installs executable packages from Hackage, e.g. `mise use cabal:pandoc-cli@latest`.",
+        "Installs executable packages from Hackage, e.g. `mise use mise-cabal:pandoc-cli@latest`.",
         "Tools are compiled from source: installs can be slow and need a Haskell toolchain.",
         "Requires GHC and cabal on PATH. Easiest via mise: the mise-ghcup plugin with tools `mise-ghcup:ghc` + `cabal`.",
         "Each tool installs self-contained under its own CABAL_DIR, so data-file tools (pandoc, hlint) work without extra steps.",

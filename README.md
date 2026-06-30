@@ -6,14 +6,14 @@ command-line tools from [Hackage](https://hackage.haskell.org) using
 install tools from their ecosystems.
 
 ```bash
-mise use cabal:pandoc-cli@latest
-mise use cabal:hlint@3.8
-mise x cabal:shellcheck -- --version
+mise use mise-cabal:pandoc-cli@latest
+mise use mise-cabal:hlint@3.8
+mise x mise-cabal:shellcheck -- --version
 ```
 
-Each tool is referenced as `cabal:<hackage-package>@<version>`.
+Each tool is referenced as `mise-cabal:<hackage-package>@<version>`.
 
-> Note: `cabal:` here is the backend prefix provided by this plugin. It is not
+> Note: `mise-cabal:` here is the backend prefix provided by this plugin. It is not
 > the same as the `cabal` binary tool (which you install separately, see below).
 
 ## Requirements
@@ -29,45 +29,45 @@ them. Add to your `mise.toml`:
 [tools]
 "aqua:ghcup" = "latest"
 "mise-ghcup:ghc" = "latest"
-"aqua:haskell/cabal/cabal-install" = "latest"
+"cabal" = "latest"
 ```
 
 `aqua:ghcup` is required because the mise-ghcup plugin declares
 `depends = { "aqua:ghcup" }`; configuring that exact spec lets mise put ghcup on
-the plugin's PATH. The cabal binary is referenced by its full
-`aqua:haskell/cabal/cabal-install` spec rather than the bare `cabal`, because this
-plugin registers the `cabal` backend name, which shadows the bare tool.
+the plugin's PATH. `cabal` is the bare registry tool name (it resolves to
+`aqua:haskell/cabal/cabal-install`); it works as a plain `cabal` entry because this
+plugin registers the `mise-cabal` backend name and no longer shadows that tool.
 Alternatively, install GHC and cabal directly via
 [GHCup](https://www.haskell.org/ghcup/).
 
 ## Install the plugin
 
 ```bash
-mise plugin install cabal https://github.com/cprecioso/mise-cabal
+mise plugin install mise-cabal https://github.com/cprecioso/mise-cabal
 ```
 
 ## Usage
 
 ```bash
 # List the versions available on Hackage
-mise ls-remote cabal:hlint
+mise ls-remote mise-cabal:hlint
 
 # Install a specific version
-mise install cabal:hlint@3.8
+mise install mise-cabal:hlint@3.8
 
 # Use it (in the current dir, or globally with -g)
-mise use cabal:hlint@latest
+mise use mise-cabal:hlint@latest
 
 # Run it
-mise x cabal:hlint@latest -- --version
+mise x mise-cabal:hlint@latest -- --version
 ```
 
 You can also add tools directly to a `mise.toml`:
 
 ```toml
 [tools]
-"cabal:pandoc-cli" = "latest"
-"cabal:hlint" = "3.8"
+"mise-cabal:pandoc-cli" = "latest"
+"mise-cabal:hlint" = "3.8"
 ```
 
 ## How it works
@@ -98,8 +98,8 @@ This repo is itself a mise project. `mise install` provisions the dev tooling
 and the Haskell toolchain.
 
 ```bash
-# Link this checkout as the `cabal` backend for local testing
-mise plugin link --force cabal .
+# Link this checkout as the `mise-cabal` backend for local testing
+mise plugin link --force mise-cabal .
 
 # Exercise the backend end to end (list + install + run `hello`)
 mise run test
@@ -121,7 +121,7 @@ hk install
 Debug a single operation:
 
 ```bash
-mise --debug install cabal:hello@latest
+mise --debug install mise-cabal:hello@latest
 ```
 
 ### Files
