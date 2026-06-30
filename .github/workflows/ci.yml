@@ -7,16 +7,91 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ci:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+  lint:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
-      - run: mise run ci
+      - run: mise run lint
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          - os: macos-latest
+          - os: macos-26-intel
+
+          - os: ubuntu-latest
+          - os: ubuntu-26.04-arm
+
+          - os: ubuntu-latest
+            image: alpine
+            install-step: >
+              apk add binutils-gold curl gcc g++ gmp-dev libc-dev libffi-dev make musl-dev ncurses-dev perl tar xz
+
+          - os: windows-latest
+          - os: windows-11-vs2026-arm
+
+        tool:
+          - name: hello
+            command: hello
+            args: ["--version"]
+          - name: alex
+            command: alex
+            args: ["--version"]
+
+    name: Test (${{ format(matrix.env.image && '{1} on {0}' || '{0}', matrix.env.os, matrix.env.image) }}, ${{ matrix.tool.name }})
+
+    runs-on: ${{ matrix.env.os }}
+    container:
+      image: ${{ matrix.env.image }}
+
+    steps:
+      - if: matrix.env.install-step
+        run: ${{ matrix.env.install-step }}
+
+      - uses: actions/checkout@v7
+        with:
+          path: ./plugin
+
+      - uses: jdx/mise-action@v4
+        with:
+          experimental: true
+          install: false
+          cache: false
+          log_level: debug
+          mise_toml: |
+            [tools]
+            "aqua:ghcup" = "latest"
+            "cabal" = "latest"
+            "mise-ghcup:ghc" = "latest"
+
+      - run: mise plugin link --force mise-cabal ./plugin
+      - run: mise install
+
+      - run: >
+          mise
+          ls-remote
+          mise-cabal:${{ matrix.tool.name }}
+
+      - run: >
+          mise
+          exec
+          mise-cabal:${{ matrix.tool.name }}@latest
+          --
+          ${{ matrix.tool.command }}
+          ${{ join(matrix.tool.args, ' ') }}
+
+      - run: >
+          mise
+          exec
+          mise-cabal:${{ matrix.tool.name }}@latest
+          --
+          ${{ runner.os == 'Windows' && 'where' || 'which' }}
+          ${{ matrix.tool.command }}
