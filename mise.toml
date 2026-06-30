@@ -13,7 +13,7 @@ MISE_USE_VERSIONS_HOST = "0"
 #   this plugin is itself named `cabal` and would otherwise shadow the registry tool.
 "aqua:ghcup" = "latest"
 "mise-ghcup:ghc" = "latest"
-"aqua:haskell/cabal/cabal-install" = "latest"
+cabal = "latest"
 
 # Dev / lint tooling. (No `lua` interpreter: hooks run in mise's embedded Lua and
 # linting uses lua-language-server. vfox-lua also fails to build on Windows.)

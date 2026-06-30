@@ -30,6 +30,27 @@ if command -v ghc >/dev/null 2>&1 && command -v cabal >/dev/null 2>&1; then
         exit 1
         ;;
     esac
+
+    # Data-file tool check. pandoc reads its templates (data files) via getDataDir at
+    # runtime, so a successful --print-default-template proves the per-tool CABAL_DIR
+    # store, where those data files live, is correctly pointed to. Building pandoc from
+    # source is heavy, so this runs on Linux only; the data-dir mechanism is identical
+    # on every OS (the per-OS path handling is already covered by the hello install).
+    if [ "$(uname -s)" = "Linux" ]; then
+        echo "==> Installing cabal:pandoc-cli@latest (data-file tool; builds pandoc, slow)"
+        mise install "cabal:pandoc-cli@latest"
+
+        echo "==> Verifying pandoc resolves its data dir (--print-default-template)"
+        tmpl="$(mise x "cabal:pandoc-cli@latest" -- pandoc --print-default-template=html)" || true
+        case "${tmpl}" in
+        *'$body$'*) echo "OK: pandoc read its default template, data dir resolved" ;;
+        *)
+            echo "FAIL: pandoc could not read its data files (data dir not pointed correctly)"
+            exit 1
+            ;;
+        esac
+    fi
+
     echo "All cabal backend tests passed."
 else
     echo "skipping build test: ghc/cabal not on PATH"
