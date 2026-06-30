@@ -39,19 +39,20 @@ local function with_cabal_dir(dir, command)
 end
 
 --- Whether an executable is available on PATH. Never raises, so we can report a
---- friendly message. mise's cmd.exec yields and therefore cannot be wrapped in
---- pcall; instead the probe always exits 0 and we inspect its output.
+--- friendly message. mise's cmd.exec yields and cannot be wrapped in pcall, so the
+--- probe always exits 0 and we inspect its output.
+---
+--- On Windows the probe is skipped: mise's cmd.exec shell makes a reliable exit-0
+--- probe hard, and CI exposes the toolchain on PATH directly. We let cabal surface
+--- any genuinely missing toolchain instead.
 --- @param name string
 --- @return boolean
 local function have_tool(name)
-    local cmd = require("cmd")
-    local probe
     if RUNTIME.osType == "windows" then
-        probe = "where " .. name .. " >NUL 2>NUL && echo HAVE || echo MISSING"
-    else
-        probe = "command -v " .. name .. " >/dev/null 2>&1 && echo HAVE || echo MISSING"
+        return true
     end
-    local out = cmd.exec(probe)
+    local cmd = require("cmd")
+    local out = cmd.exec("command -v " .. name .. " >/dev/null 2>&1 && echo HAVE || echo MISSING")
     return type(out) == "string" and out:find("HAVE", 1, true) ~= nil
 end
 
