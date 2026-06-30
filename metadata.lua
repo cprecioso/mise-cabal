@@ -25,13 +25,13 @@ PLUGIN = { -- luacheck: ignore
     -- cabal compiles from source, so both the compiler and cabal-install are needed.
     -- Full backend specs are used because the bare name `ghc` resolves to the
     -- registry entry (conda/asdf), not the mise-ghcup tool used here.
-    depends = { "mise-ghcup:ghc", "aqua:haskell/cabal/cabal-install" },
+    depends = { "mise-ghcup:ghc", "cabal" },
 
     -- Optional: user-facing notes
     notes = {
         "Installs executable packages from Hackage, e.g. `mise use cabal:pandoc-cli@latest`.",
         "Tools are compiled from source: installs can be slow and need a Haskell toolchain.",
-        "Requires GHC and cabal on PATH. Easiest via mise: the mise-ghcup plugin with tools `aqua:ghcup` + `mise-ghcup:ghc` + `aqua:haskell/cabal/cabal-install`.",
+        "Requires GHC and cabal on PATH. Easiest via mise: the mise-ghcup plugin with tools `mise-ghcup:ghc` + `cabal`.",
         "Each tool installs self-contained under its own CABAL_DIR, so data-file tools (pandoc, hlint) work without extra steps.",
         "Library-only packages (no executable) are not supported.",
     },

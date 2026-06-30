@@ -17,18 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
-
-      # On Windows, mise does not place the plugin's dependency tools (ghc/cabal)
-      # on the nested install-hook PATH, so expose them on PATH explicitly. Not
-      # needed on Linux/macOS, where the plugin's `depends` wiring works.
-      - name: Expose the Haskell toolchain on PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          ghc_bin="$(mise where mise-ghcup:ghc)/bin"
-          cabal_bin="$(mise where aqua:haskell/cabal/cabal-install)"
-          echo "$ghc_bin" >> "$GITHUB_PATH"
-          echo "$cabal_bin" >> "$GITHUB_PATH"
       - run: mise run ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
