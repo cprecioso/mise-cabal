@@ -88,4 +88,4 @@ jobs:
       - run: >
           mise exec mise-cabal:${{ matrix.tool.name }}@latest
           --
-          mise run test:${{ matrix.tool.command }}
+          mise run ./plugin/test/${{ matrix.tool.command }}
