@@ -41,10 +41,8 @@ jobs:
         tool:
           - name: hello
             command: hello
-            args: ["--version"]
           - name: alex
             command: alex
-            args: ["--version"]
 
     name: Test (${{ format(matrix.env.image && '{1} on {0}' || '{0}', matrix.env.os, matrix.env.image) }}, ${{ matrix.tool.name }})
 
@@ -76,22 +74,15 @@ jobs:
       - run: mise install
 
       - run: >
-          mise
-          ls-remote
-          mise-cabal:${{ matrix.tool.name }}
+          mise ls-remote mise-cabal:${{ matrix.tool.name }}
 
       - run: >
-          mise
-          exec
-          mise-cabal:${{ matrix.tool.name }}@latest
-          --
-          ${{ matrix.tool.command }}
-          ${{ join(matrix.tool.args, ' ') }}
-
-      - run: >
-          mise
-          exec
-          mise-cabal:${{ matrix.tool.name }}@latest
+          mise exec mise-cabal:${{ matrix.tool.name }}@latest
           --
           ${{ runner.os == 'Windows' && 'where' || 'which' }}
           ${{ matrix.tool.command }}
+
+      - run: >
+          mise exec mise-cabal:${{ matrix.tool.name }}@latest
+          --
+          mise run test:${{ matrix.tool.command }}
