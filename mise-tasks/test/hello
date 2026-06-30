@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#MISE description="Run backend plugin tests - test alex works correctly (needs correct data_dir handling)"
+#MISE tools={"mise-cabal:hello" = "latest"}
+set -euo pipefail
+
+echo "==> Executing the installed binary (BackendExecEnv)"
+# `hello` has no --version flag, so run it bare and assert on its output.
+
+out="$(hello)"
+echo "    output: ${out}"
+
+case "${out}" in
+*Hello*) echo "OK: got expected greeting" ;;
+*)
+	echo "FAIL: unexpected output from hello"
+	exit 1
+	;;
+esac

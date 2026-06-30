@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#MISE description="Run backend plugin tests - test alex works correctly (needs correct data_dir handling)"
+#MISE tools={"mise-cabal:alex" = "latest"}
+set -euo pipefail
+
+# Data-file tool check. alex (the Haskell lexer generator) reads its code-gen
+# templates (AlexTemplate.hs / AlexWrappers.hs, declared as cabal data-files)
+# from its data dir at runtime via Paths_alex/getDataDir, so generating a lexer
+# proves the per-tool CABAL_DIR store, where those data files live, is pointed
+# to correctly. alex depends only on base/array/containers/directory, so unlike
+# others like pandoc it builds in seconds on every OS.
+
+echo "==> Verifying alex resolves its data dir (generates a lexer from its template)"
+
+work="$(mktemp -d)"
+trap 'rm -rf "${work}"' EXIT
+
+cat >"${work}/lexer.x" <<'EOF'
+{
+module Main (main) where
+}
+%wrapper "basic"
+tokens :-
+  $white+      ;
+  [a-zA-Z]+    { \s -> s }
+{
+main :: IO ()
+main = return ()
+}
+EOF
+
+# Run from the temp dir with RELATIVE paths so this also works under Windows Git
+# Bash: the native alex.exe would not understand an MSYS "/tmp/..." path.
+(cd "${work}" && alex lexer.x -o lexer.hs)
+
+if grep -q 'alexScan' "${work}/lexer.hs"; then
+	echo "OK: alex spliced in its template, data dir resolved"
+else
+	echo "FAIL: alex could not read its template data files (data dir not pointed correctly)"
+	exit 1
+fi
