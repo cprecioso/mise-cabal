@@ -1,18 +1,12 @@
---- Platform-aware shell quoting (paths can contain spaces).
+--- Single-quote a string for POSIX sh (unix only; paths may contain spaces).
 --- @param s string
 --- @return string
-local function shquote(s)
-    s = tostring(s)
-    if RUNTIME.osType == "windows" then
-        return '"' .. s .. '"'
-    end
-    return "'" .. s:gsub("'", "'\\''") .. "'"
+local function sh_quote(s)
+    return "'" .. tostring(s):gsub("'", "'\\''") .. "'"
 end
 
 --- Convert forward slashes to backslashes on Windows. mise's paths use forward
---- slashes, but cmd.exe builtins (mkdir, dir) reject them ("The filename,
---- directory name, or volume label syntax is incorrect"). cabal itself accepts
---- either, but we normalize everywhere for consistency.
+--- slashes, but cmd.exe rejects them in some places.
 --- @param p string
 --- @return string
 local function native_path(p)
@@ -20,6 +14,19 @@ local function native_path(p)
         return (p:gsub("/", "\\"))
     end
     return p
+end
+
+--- A path as a shell argument. mise runs commands as `cmd /c "<command>"` on
+--- Windows, so adding our own quotes would nest and break parsing; mise install
+--- paths have no spaces, so a bare backslash path is correct there. On unix we
+--- single-quote for sh.
+--- @param p string
+--- @return string
+local function path_arg(p)
+    if RUNTIME.osType == "windows" then
+        return native_path(p)
+    end
+    return sh_quote(p)
 end
 
 --- Create a directory (and parents) cross-platform; no-op if it already exists.
@@ -31,9 +38,9 @@ local function ensure_dir(path)
         return
     end
     if RUNTIME.osType == "windows" then
-        cmd.exec("mkdir " .. shquote(native_path(path))) -- cmd.exe md creates intermediate dirs
+        cmd.exec("mkdir " .. path_arg(path)) -- cmd.exe md creates intermediate dirs
     else
-        cmd.exec("mkdir -p " .. shquote(path))
+        cmd.exec("mkdir -p " .. path_arg(path))
     end
 end
 
@@ -41,14 +48,16 @@ end
 --- store, package index, config, and bins all go there). Setting it through the
 --- shell keeps the rest of the environment (PATH, HOME, ...), unlike replacing
 --- the process env. (env.setenv does not propagate to the cmd.exec subprocess.)
+--- On Windows, `set VAR=value&& cmd` avoids quotes (which would nest under mise's
+--- `cmd /c "..."`) and the trailing space that would otherwise enter the value.
 --- @param dir string
 --- @param command string
 --- @return string
 local function with_cabal_dir(dir, command)
     if RUNTIME.osType == "windows" then
-        return 'set "CABAL_DIR=' .. native_path(dir) .. '" && ' .. command
+        return "set CABAL_DIR=" .. native_path(dir) .. "&& " .. command
     end
-    return "CABAL_DIR=" .. shquote(dir) .. " " .. command
+    return "CABAL_DIR=" .. sh_quote(dir) .. " " .. command
 end
 
 --- Whether an executable is available on PATH. Never raises, so we can report a
@@ -123,16 +132,16 @@ function PLUGIN:BackendInstall(ctx)
         .. "-"
         .. version
         .. " --overwrite-policy=always --installdir="
-        .. shquote(native_path(bin_dir))
+        .. path_arg(bin_dir)
     cmd.exec(with_cabal_dir(install_path, install_cmd), { cwd = install_path })
 
     -- Safety net: a successful install must place at least one executable here.
     -- Catches library-only packages if cabal did not already error out.
     local listing
     if RUNTIME.osType == "windows" then
-        listing = cmd.exec("dir /b " .. shquote(native_path(bin_dir)) .. " 2>NUL || echo.")
+        listing = cmd.exec("dir /b " .. path_arg(bin_dir) .. " 2>NUL || echo.")
     else
-        listing = cmd.exec("ls -1 " .. shquote(bin_dir) .. " 2>/dev/null || echo")
+        listing = cmd.exec("ls -1 " .. path_arg(bin_dir) .. " 2>/dev/null || echo")
     end
     if type(listing) ~= "string" or listing:gsub("%s", "") == "" then
         error(
