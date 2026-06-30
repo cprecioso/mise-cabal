@@ -9,14 +9,16 @@ MISE_USE_VERSIONS_HOST = "0"
 # GHC via the mise-ghcup plugin, cabal via aqua. The cabal binary is referenced by
 # its full aqua spec, not the bare name `cabal`, because this plugin is itself named
 # `cabal` and would otherwise shadow the registry tool.
-ghcup = "latest"
+# Note: mise-ghcup needs the `ghcup` binary on the system PATH (CI installs it on
+# macOS; ubuntu/Windows runners ship it). A mise-managed ghcup is not visible to the
+# plugin's hooks, so it is not listed here.
 "mise-ghcup:ghc" = "latest"
 "aqua:haskell/cabal/cabal-install" = "latest"
 
-# Dev / lint tooling.
+# Dev / lint tooling. (No `lua` interpreter: hooks run in mise's embedded Lua and
+# linting uses lua-language-server. vfox-lua also fails to build on Windows.)
 actionlint = "latest"
 hk = "latest"
-lua = "5.4"
 lua-language-server = "latest"
 pkl = "latest"
 stylua = "latest"

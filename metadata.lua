@@ -31,7 +31,7 @@ PLUGIN = { -- luacheck: ignore
     notes = {
         "Installs executable packages from Hackage, e.g. `mise use cabal:pandoc-cli@latest`.",
         "Tools are compiled from source: installs can be slow and need a Haskell toolchain.",
-        "Requires GHC and cabal on PATH. Easiest via mise: the mise-ghcup plugin with tools `mise-ghcup:ghc` + `aqua:haskell/cabal/cabal-install`.",
+        "Requires GHC and cabal on PATH; mise-ghcup also needs the ghcup binary on PATH. Easiest via mise: the mise-ghcup plugin with tools `mise-ghcup:ghc` + `aqua:haskell/cabal/cabal-install`.",
         "Each tool installs self-contained under its own CABAL_DIR, so data-file tools (pandoc, hlint) work without extra steps.",
         "Library-only packages (no executable) are not supported.",
     },

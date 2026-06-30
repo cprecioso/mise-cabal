@@ -16,6 +16,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      # mise-ghcup locates ghcup via `which ghcup` (system PATH). ubuntu and Windows
+      # runners ship ghcup, but the macOS runner does not, so install it there.
+      - name: Install GHCup (macOS)
+        if: runner.os == 'macOS'
+        env:
+          BOOTSTRAP_HASKELL_NONINTERACTIVE: "1"
+          BOOTSTRAP_HASKELL_MINIMAL: "1"
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+          echo "$HOME/.ghcup/bin" >> "$GITHUB_PATH"
       - uses: jdx/mise-action@v2
         with:
           # Cache the installed toolchain (GHC is large) and cabal store.

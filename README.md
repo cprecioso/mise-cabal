@@ -27,14 +27,15 @@ them. Add to your `mise.toml`:
 "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
 
 [tools]
-ghcup = "latest"
 "mise-ghcup:ghc" = "latest"
 "aqua:haskell/cabal/cabal-install" = "latest"
 ```
 
-The cabal binary is referenced by its full `aqua:haskell/cabal/cabal-install`
-spec rather than the bare `cabal`, because this plugin registers the `cabal`
-backend name, which shadows the bare tool. Alternatively, install GHC and cabal
+`mise-ghcup` requires the `ghcup` binary on your PATH (most Haskell setups
+already have it; otherwise install it from <https://www.haskell.org/ghcup/>). The
+cabal binary is referenced by its full `aqua:haskell/cabal/cabal-install` spec
+rather than the bare `cabal`, because this plugin registers the `cabal` backend
+name, which shadows the bare tool. Alternatively, install GHC and cabal directly
 via [GHCup](https://www.haskell.org/ghcup/).
 
 ## Install the plugin

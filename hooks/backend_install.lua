@@ -80,7 +80,7 @@ function PLUGIN:BackendInstall(ctx)
             "cabal: 'cabal' not found on PATH. This backend compiles tools from source and needs GHC + cabal.\n"
                 .. "Easiest via mise, add to your config:\n"
                 .. '  [plugins]\n  "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"\n'
-                .. '  [tools]\n  ghcup = "latest"\n  "mise-ghcup:ghc" = "latest"\n  "aqua:haskell/cabal/cabal-install" = "latest"\n'
+                .. '  [tools]\n  "mise-ghcup:ghc" = "latest"\n  "aqua:haskell/cabal/cabal-install" = "latest"\n'
                 .. "Or install GHCup: https://www.haskell.org/ghcup/"
         )
     end
