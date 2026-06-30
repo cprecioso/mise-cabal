@@ -6,12 +6,12 @@ MISE_USE_VERSIONS_HOST = "0"
 
 [tools]
 # Haskell toolchain used to build/test the cabal backend.
-# GHC via the mise-ghcup plugin, cabal via aqua. The cabal binary is referenced by
-# its full aqua spec, not the bare name `cabal`, because this plugin is itself named
-# `cabal` and would otherwise shadow the registry tool.
-# Note: mise-ghcup needs the `ghcup` binary on the system PATH (CI installs it on
-# macOS; ubuntu/Windows runners ship it). A mise-managed ghcup is not visible to the
-# plugin's hooks, so it is not listed here.
+# - aqua:ghcup: the mise-ghcup plugin declares `depends = { "aqua:ghcup" }`, so this
+#   exact spec must be configured for mise to put ghcup on the plugin's hook PATH.
+# - mise-ghcup:ghc: GHC, installed through ghcup by the plugin.
+# - cabal via aqua, referenced by its full spec rather than the bare `cabal` because
+#   this plugin is itself named `cabal` and would otherwise shadow the registry tool.
+"aqua:ghcup" = "latest"
 "mise-ghcup:ghc" = "latest"
 "aqua:haskell/cabal/cabal-install" = "latest"
 
