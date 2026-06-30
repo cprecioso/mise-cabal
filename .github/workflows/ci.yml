@@ -14,17 +14,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # Windows is non-blocking: mise does not wire the plugin's dependency tools onto
-    # the nested install-hook PATH there (the toolchain is on the step PATH but the
-    # hook can't see it). The step below works around it by exposing the toolchain on
-    # PATH; kept non-blocking until that is confirmed.
-    continue-on-error: ${{ matrix.os == 'windows-latest' }}
     steps:
       - uses: actions/checkout@v5
       - uses: jdx/mise-action@v4
         with:
           # Cache the installed toolchain (GHC is large) and cabal store.
           cache: true
+      # On Windows, mise does not place the plugin's dependency tools (ghc/cabal)
+      # on the nested install-hook PATH, so expose them on PATH explicitly. Not
+      # needed on Linux/macOS, where the plugin's `depends` wiring works.
       - name: Expose the Haskell toolchain on PATH (Windows)
         if: runner.os == 'Windows'
         shell: bash
