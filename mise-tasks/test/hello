@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Run backend plugin tests - test alex works correctly (needs correct data_dir handling)"
+#MISE description="Run backend plugin tests - test hello executes correctly"
 #MISE tools={"mise-cabal:hello" = "latest"}
 set -euo pipefail
 
