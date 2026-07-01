@@ -101,15 +101,9 @@ and the Haskell toolchain.
 # Link this checkout as the `mise-cabal` backend for local testing
 mise plugin link --force mise-cabal .
 
-# Exercise the backend end to end (list + install + run `hello`)
-mise run test
-
 # Lint and format (stylua + luacheck + actionlint via hk)
 mise run lint
 mise run lint-fix
-
-# Everything CI runs
-mise run ci
 ```
 
 Enable pre-commit hooks (optional):
