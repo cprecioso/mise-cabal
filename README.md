@@ -1,9 +1,9 @@
 # mise-cabal
 
-A [mise](https://mise.jdx.dev) **backend plugin** that installs Haskell
-command-line tools from [Hackage](https://hackage.haskell.org) using
-`cabal-install`, the same way the built-in `npm:`, `gem:`, and `cargo:` backends
-install tools from their ecosystems.
+A [mise](https://mise.jdx.dev) backend plugin that installs Haskell command-line
+tools from [Hackage](https://hackage.haskell.org) using `cabal-install`, the
+same way the built-in `npm:`, `gem:`, and `cargo:` backends install tools from
+their ecosystems.
 
 ```bash
 mise use mise-cabal:pandoc-cli@latest
@@ -13,40 +13,52 @@ mise x mise-cabal:shellcheck -- --version
 
 Each tool is referenced as `mise-cabal:<hackage-package>@<version>`.
 
-> Note: `mise-cabal:` here is the backend prefix provided by this plugin. It is not
-> the same as the `cabal` binary tool (which you install separately, see below).
+> Note: `mise-cabal:` here is the backend prefix provided by this plugin. It is
+> not the same as the `cabal` binary tool (which you install separately, see
+> below).
 
 ## Requirements
 
-This backend compiles tools from source, so it needs a working Haskell
-toolchain (GHC + cabal-install) on `PATH`. The easiest way is to let mise manage
-them. Add to your `mise.toml`:
+We compile tools from source, so a working Haskell toolchain is needed:
+
+- Cabal
+- GHC
+
+The easiest way is to let mise manage everything, in conjunction with the
+`mise-ghcup` plugin. Add to your `mise.toml`:
 
 ```toml
+[tools]
+"cabal" = "latest"
+"ghcup" = "latest"
+"mise-ghcup:ghc" = "latest"
+
 [plugins]
 "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
 
-[tools]
-"aqua:ghcup" = "latest"
-"mise-ghcup:ghc" = "latest"
-"cabal" = "latest"
+[settings]
+experimental = true # Needed for using backend plugins like mise-ghcup and mise-cabal
 ```
-
-`aqua:ghcup` is required because the mise-ghcup plugin declares
-`depends = { "aqua:ghcup" }`; configuring that exact spec lets mise put ghcup on
-the plugin's PATH. `cabal` is the bare registry tool name (it resolves to
-`aqua:haskell/cabal/cabal-install`); it works as a plain `cabal` entry because this
-plugin registers the `mise-cabal` backend name and no longer shadows that tool.
-Alternatively, install GHC and cabal directly via
-[GHCup](https://www.haskell.org/ghcup/).
 
 ## Install the plugin
 
 ```bash
-mise plugin install mise-cabal https://github.com/cprecioso/mise-cabal
+mise plugin install https://github.com/cprecioso/mise-cabal
 ```
 
 ## Usage
+
+In your `mise.toml` file:
+
+```toml
+[plugins]
+"vfox:mise-cabal" = "https://github.com/cprecioso/mise-cabal.git"
+
+[settings]
+experimental = true # Needed for using backend plugins like mise-cabal
+```
+
+Then you can use it freely:
 
 ```bash
 # List the versions available on Hackage
