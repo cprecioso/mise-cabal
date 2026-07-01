@@ -101,7 +101,7 @@ and the Haskell toolchain.
 # Link this checkout as the `mise-cabal` backend for local testing
 mise plugin link --force mise-cabal .
 
-# Lint and format (stylua + luacheck + actionlint via hk)
+# Lint and format (stylua + lua-language-server + actionlint via hk)
 mise run lint
 mise run lint-fix
 ```
