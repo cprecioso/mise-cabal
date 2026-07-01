@@ -119,6 +119,8 @@ mise --debug install mise-cabal:hello@latest
 - `hooks/backend_list_versions.lua` - lists Hackage versions
 - `hooks/backend_install.lua` - builds and installs a package
 - `hooks/backend_exec_env.lua` - puts the tool's bin dir on `PATH`
+- `lib/fs.lua` - cross-platform path quoting and directory helpers
+- `lib/cabal.lua` - runs a command with the tool's isolated `CABAL_DIR`
 - `mise.toml` - dev tooling, Haskell toolchain, and tasks
 - `mise-tasks/test` - end-to-end test task
 - `.github/workflows/ci.yml` - CI on Linux, macOS, and Windows
