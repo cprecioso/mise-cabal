@@ -5,7 +5,7 @@
 function PLUGIN:BackendListVersions(ctx)
     local http = require("http")
     local json = require("json")
-    local semver = require("semver")
+    local cabal = require("cabal")
 
     local tool = ctx.tool
     if not tool or tool == "" then
@@ -50,6 +50,8 @@ function PLUGIN:BackendListVersions(ctx)
         error("mise-cabal: no versions found for '" .. tool .. "'")
     end
 
-    -- Built-in semver sort (ascending), as mise expects oldest -> newest.
-    return { versions = semver.sort(versions) }
+    -- Sort ascending (oldest -> newest), as mise expects. We use our own Cabal
+    -- version comparison because the built-in semver.sort assumes 3-component
+    -- versions and mis-orders Cabal's 1-to-4-component (PVP) versions.
+    return { versions = cabal.sort_versions(versions) }
 end
