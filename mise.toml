@@ -6,20 +6,9 @@ MISE_USE_VERSIONS_HOST = "0"
 
 [tools]
 # Haskell toolchain used to build/test the mise-cabal backend.
-# - aqua:ghcup: the mise-ghcup plugin declares `depends = { "aqua:ghcup" }`, so this
-#   exact spec must be configured for mise to put ghcup on the plugin's hook PATH.
-# - mise-ghcup:ghc: pinned to a concrete recent GHC (9.14.1, the newest alex
-#   builds with). It must be a concrete version, NOT "latest": this repo sets
-#   MISE_USE_VERSIONS_HOST=0 to exercise the real hooks, so resolving "latest"
-#   would call mise-ghcup's list-versions hook, which requires ghcup to already be
-#   installed before it itself is installed. A concrete version skips that lookup
-#   and bootstraps cleanly on a fresh CI runner.
-# - cabal: the bare registry name, which resolves to aqua:haskell/cabal/cabal-install.
-#   The bare name works because the plugin is named `mise-cabal`; a plugin named
-#   `cabal` would shadow this registry entry and break the toolchain install.
-"aqua:ghcup" = "latest"
-"mise-ghcup:ghc" = "9.14.1"
 cabal = "latest"
+ghcup = "latest"
+"mise-ghcup:ghc" = "9.14.1"
 
 # Dev / lint tooling. (No `lua` interpreter: hooks run in mise's embedded Lua and
 # linting uses lua-language-server. vfox-lua also fails to build on Windows.)

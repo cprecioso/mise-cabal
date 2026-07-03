@@ -66,8 +66,8 @@ jobs:
           log_level: debug
           mise_toml: |
             [tools]
-            "aqua:ghcup" = "latest"
-            "cabal" = "latest"
+            ghcup = "latest"
+            cabal = "latest"
             "mise-ghcup:ghc" = "9.14.1"
 
             [plugins]
