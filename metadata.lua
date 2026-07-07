@@ -9,9 +9,9 @@ PLUGIN = { -- luacheck: ignore
 
     description = "A mise backend plugin to install Haskell command-line tools from Hackage with cabal-install.",
 
-    author = "cprecioso",
+    author = "Wasp",
 
-    homepage = "https://github.com/cprecioso/mise-cabal",
+    homepage = "https://github.com/wasp-lang/mise-cabal",
 
     license = "MIT",
 

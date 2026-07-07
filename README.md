@@ -37,7 +37,7 @@ experimental = true # Needed for using backend plugins like mise-ghcup and mise-
 ## Install the plugin
 
 ```bash
-mise plugin install https://github.com/cprecioso/mise-cabal
+mise plugin install https://github.com/wasp-lang/mise-cabal
 ```
 
 ## Usage
@@ -46,7 +46,7 @@ In your `mise.toml` file:
 
 ```toml
 [plugins]
-"vfox:mise-cabal" = "https://github.com/cprecioso/mise-cabal.git"
+"vfox:mise-cabal" = "https://github.com/wasp-lang/mise-cabal.git"
 
 [settings]
 experimental = true # Needed for using backend plugins like mise-cabal
