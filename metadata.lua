@@ -15,7 +15,7 @@ PLUGIN = { -- luacheck: ignore
 
     license = "MIT",
 
-    depends = { "ghcup", "mise-ghcup:ghc", "cabal", "aqua:cabal" },
+    depends = { "ghc", "mise-ghcup:ghc", "cabal", "aqua:cabal", "mise-ghcup:cabal" },
 
     notes = {
         "Installs executable packages from Hackage, e.g. `mise use mise-cabal:pandoc-cli@latest`.",
