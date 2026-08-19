@@ -50,6 +50,11 @@ jobs:
     container:
       image: ${{ matrix.env.image }}
 
+    env:
+      # Report missing systemDependencies instead of prompting or installing them,
+      # so a mis-declared check shows up in the log rather than stalling the job.
+      MISE_SYSTEM_DEPS: warn
+
     steps:
       - if: matrix.env.install-step
         run: ${{ matrix.env.install-step }}
@@ -71,7 +76,7 @@ jobs:
             "mise-ghcup:ghc" = "9.14.1"
 
             [plugins]
-            "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
+            "vfox-backend:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
 
       - run: mise plugin link --force mise-cabal ./plugin
       - run: mise install
