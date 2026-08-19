@@ -17,8 +17,8 @@ PLUGIN = { -- luacheck: ignore
 
     depends = { "ghc", "mise-ghcup:ghc", "cabal", "aqua:cabal", "mise-ghcup:cabal" },
 
-    -- Prerequisites mise checks before installing, so a missing one is reported
-    -- up front instead of halfway through a from-source build.
+    -- Prerequisites mise checks before installing, so a missing one is installed
+    -- or reported up front instead of blowing up halfway through a build.
     systemDependencies = {
         -- GHC links against gmp at runtime, and a missing libgmp is the classic
         -- "ghc: error while loading shared libraries" on minimal Linux images.
@@ -29,22 +29,33 @@ PLUGIN = { -- luacheck: ignore
             packages = { apt = "libgmp-dev", dnf = "gmp-devel", pacman = "gmp", apk = "gmp-dev" },
         },
 
-        -- Building a Hackage package shells out to a C compiler to link, and
-        -- packages that bind to C libraries look them up with pkg-config. These
-        -- are marked optional on purpose: they are genuinely needed on Linux and
-        -- macOS, but mise has no per-OS filter on these entries and resolves
-        -- `bin` without PATHEXT, so a required check would false-alarm on
-        -- Windows. Optional entries never prompt or fail, they just print a hint
-        -- when missing.
+        -- Building any Hackage package shells out to a C compiler to link, so
+        -- this is required and mise will install it when missing. No `brew`
+        -- entry: on macOS the compiler comes from the Xcode command line tools,
+        -- not from a package, so brew has nothing right to offer. The other
+        -- platform to know about is Windows, where the Haskell toolchain brings
+        -- its own MSYS2 and mise's `bin` lookup ignores PATHEXT, so this is
+        -- reported as missing with no package manager to fix it. That is a
+        -- warning only, it never fails the install.
         {
             bin = "gcc",
-            optional = "the C toolchain GHC uses to compile and link",
             packages = { apt = "build-essential", dnf = "gcc", pacman = "gcc", apk = "gcc" },
         },
+
+        -- Only packages that bind to system C libraries need pkg-config, so this
+        -- stays optional: mise mentions it when missing rather than installing
+        -- it, which keeps `mise use mise-cabal:hlint` from pulling in a package
+        -- that build will never touch.
         {
             bin = "pkg-config",
             optional = "Hackage packages that bind to system C libraries",
-            packages = { apt = "pkg-config", dnf = "pkgconf-pkg-config", pacman = "pkgconf", apk = "pkgconf" },
+            packages = {
+                brew = "pkgconf",
+                apt = "pkg-config",
+                dnf = "pkgconf-pkg-config",
+                pacman = "pkgconf",
+                apk = "pkgconf",
+            },
         },
     },
 
