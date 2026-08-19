@@ -1,6 +1,6 @@
 --- Installs a Hackage executable package via `cabal install`.
 --- Documentation: https://mise.jdx.dev/backend-plugin-development.html#backendinstall
---- @param ctx BackendInstallCtx  (also has ctx.download_path, ctx.options at runtime)
+--- @param ctx BackendInstallCtx
 --- @return BackendInstallResult
 function PLUGIN:BackendInstall(ctx)
     local cabal = require("cabal")

@@ -50,6 +50,9 @@ jobs:
     container:
       image: ${{ matrix.env.image }}
 
+    env:
+      MISE_SYSTEM_DEPS: auto
+
     steps:
       - if: matrix.env.install-step
         run: ${{ matrix.env.install-step }}
@@ -71,7 +74,7 @@ jobs:
             "mise-ghcup:ghc" = "9.14.1"
 
             [plugins]
-            "vfox:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
+            "vfox-backend:mise-ghcup" = "https://github.com/wasp-lang/mise-ghcup.git"
 
       - run: mise plugin link --force mise-cabal ./plugin
       - run: mise install

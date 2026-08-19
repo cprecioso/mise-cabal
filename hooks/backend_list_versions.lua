@@ -15,10 +15,11 @@ function PLUGIN:BackendListVersions(ctx)
     -- The Hackage "preferred" endpoint returns JSON with two arrays:
     --   "normal-version"     : usable versions
     --   "deprecated-version" : versions the maintainer discourages (still installable)
-    -- NOTE: http.get yields internally, so it must NOT be wrapped in pcall. It
-    -- returns (response, err) instead of raising.
+    -- NOTE: http yields internally, so it must NOT be wrapped in pcall. Use the
+    -- try_ variant, which returns (response, err) instead of raising on transport
+    -- failures (timeout, DNS, connection refused).
     local url = "https://hackage.haskell.org/package/" .. tool .. "/preferred"
-    local resp, err = http.get({ url = url, headers = { ["Accept"] = "application/json" } })
+    local resp, err = http.try_get({ url = url, headers = { ["Accept"] = "application/json" } })
     if err ~= nil then
         error("mise-cabal: failed to reach Hackage for '" .. tool .. "': " .. tostring(err))
     end
