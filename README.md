@@ -14,6 +14,8 @@ Each tool is referenced as `mise-cabal:<hackage-package>@<version>`.
 
 ## Requirements
 
+- mise `2026.7.3` or newer
+
 We compile tools from source, so a working Haskell toolchain is needed:
 
 - Cabal
@@ -22,6 +24,8 @@ We compile tools from source, so a working Haskell toolchain is needed:
 The easiest way is to let mise manage everything, in conjunction with the `mise-ghcup` plugin. Add to your `mise.toml`:
 
 ```toml
+min_version = "2026.7.3"
+
 [tools]
 "cabal" = "latest"
 "ghcup" = "latest"
@@ -51,13 +55,6 @@ In your `mise.toml` file:
 [settings]
 experimental = true # Needed for using backend plugins like mise-cabal
 ```
-
-> [!IMPORTANT]
->
-> The `vfox-backend:` prefix is required. `vfox:` declares a *tool* plugin, and mise
-> then fails to resolve the tools with `Invalid version: <package>: relative URL
-> without a base`. If you have `"vfox:mise-cabal"` (or `"vfox:mise-ghcup"`) in your
-> `mise.toml`, update it.
 
 Then you can use it freely:
 
