@@ -17,7 +17,6 @@ PLUGIN = { -- luacheck: ignore
 
     depends = { "ghc", "mise-ghcup:ghc", "cabal", "aqua:cabal", "mise-ghcup:cabal" },
 
-    -- `cabal` defaults to curl for the https requests it makes to Hackage.
     systemDependencies = {
         {
             bin = "curl",
