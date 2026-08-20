@@ -22,6 +22,20 @@ PLUGIN = { -- luacheck: ignore
             bin = "curl",
             packages = { brew = "curl", apt = "curl", dnf = "curl", pacman = "curl", apk = "curl" },
         },
+        {
+            bin = "ghc",
+            packages = { brew = "ghc", apt = "ghc", dnf = "ghc", pacman = "ghc", apk = "ghc" },
+        },
+        {
+            bin = "cabal",
+            packages = {
+                brew = "cabal-install",
+                apt = "cabal-install",
+                dnf = "cabal-install",
+                pacman = "cabal-install",
+                apk = "cabal",
+            },
+        },
     },
 
     notes = {
